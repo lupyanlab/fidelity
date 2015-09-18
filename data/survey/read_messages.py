@@ -21,6 +21,10 @@ def extract_from_path(frame, path_col, name, index):
 for i, name in enumerate(['game_name', 'chain_name', 'message_name']):
     messages = extract_from_path(messages, 'audio', name, i)
 
+messages = messages.ix[messages.game_name != 'test-game']
+
 messages = messages.sort(['game_name', 'chain_name', 'message_name'])
+
+messages = messages.rename(columns={'pk': 'message_id', 'chain': 'chain_id', 'parent': 'parent_id'})
 
 messages.to_csv('messages.csv', index=False)
