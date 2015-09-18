@@ -53,6 +53,42 @@ def create_surveys_b():
     with open('within_survey_b.json', 'w') as f:
         f.write(json.dumps(within_survey))
 
+def create_surveys_c():
+    """ In this survey people are given imitations from the between-category-game-a
+    and choices from the within-category-game."""
+    messages = pd.read_csv('messages-cleaned.csv')
+
+    # Get rid of bad recordings
+    messages['to_remove'] = messages.to_remove.fillna(0)
+    messages = messages.ix[messages.to_remove == 0]
+
+    # Split off the seeds
+    seeds = messages.ix[messages.generation == 0]
+    imitations = messages.ix[messages.generation != 0]
+
+    between_game_name = 'between-category-game-a'
+    within_game_name = 'within-category-game-a'
+
+    between_choices = seeds.ix[seeds.game_name == between_game_name, 'message_id'].tolist()
+    within_choices = seeds.ix[seeds.game_name == within_game_name, 'message_id'].tolist()
+
+    between_imitations = imitations.ix[imitations.game_name == between_game_name, 'message_id'].tolist()
+    within_imitations = imitations.ix[imitations.game_name == within_game_name, 'message_id'].tolist()
+
+    between_to_within = {}
+    between_to_within['given'] = between_imitations
+    between_to_within['choices'] = within_choices
+    with open('between_imitations_to_within_choices_survey.json', 'w') as f:
+        f.write(json.dumps(between_to_within))
+
+    within_to_between = {}
+    within_to_between['given'] = within_imitations
+    within_to_between['choices'] = between_choices
+    with open('within_imitations_to_between_choices_survey.json', 'w') as f:
+        f.write(json.dumps(within_to_between))
+
+
 if __name__ == '__main__':
     create_surveys_a()
     create_surveys_b()
+    create_surveys_c()
