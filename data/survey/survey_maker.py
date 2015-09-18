@@ -30,6 +30,8 @@ def create_surveys_a():
     with open('within_survey_a.json', 'w') as f:
         f.write(json.dumps(within_survey))
 
+    return between_survey, within_survey
+
 def create_surveys_b():
     messages = pd.read_csv('messages-cleaned.csv')
 
@@ -55,6 +57,8 @@ def create_surveys_b():
     with open('within_survey_b.json', 'w') as f:
         f.write(json.dumps(within_survey))
 
+    return between_survey, within_survey
+
 def create_surveys_c():
     """ In this survey people are given imitations from the between-category-game-a
     and choices from the within-category-game."""
@@ -71,45 +75,40 @@ def create_surveys_c():
     between_game_name = 'between-category-game-a'
     within_game_name = 'within-category-game-a'
 
-
     between_choices = seeds.ix[seeds.game_name == between_game_name, 'message_id'].tolist()
     within_choices = seeds.ix[seeds.game_name == within_game_name, 'message_id'].tolist()
 
-    between_imitations = imitations.ix[imitations.game_name == between_game_name, 'message_id'].tolist()
-    within_imitations = imitations.ix[imitations.game_name == within_game_name, 'message_id'].tolist()
+    between_imitations = imitations.ix[(imitations.game_name == between_game_name) & (imitations.chain_name != 'splish'), 'message_id'].tolist()
+    within_imitations = imitations.ix[(imitations.game_name == within_game_name)  & (imitations.chain_name != 'splish'), 'message_id'].tolist()
 
-    # shuffle so that surveys are split by generation
+    between_splish = imitations.ix[(imitations.game_name == between_game_name) & (imitations.chain_name == 'splish'), 'message_id'].tolist()
+    within_splish = imitations.ix[(imitations.game_name == within_game_name) & (imitations.chain_name == 'splish'), 'message_id'].tolist()
+
+    # select imitations at random because we don't have time to collect all ratings
     random.seed(100)
-    random.shuffle(between_imitations)
-    random.shuffle(within_imitations)
 
-    between_to_within = {}
-    between_to_within['given'] = between_imitations[:len(between_imitations)/2]
-    between_to_within['choices'] = within_choices
-    with open('between_imitations_to_within_choices_survey_part_1.json', 'w') as f:
-        f.write(json.dumps(between_to_within))
+    all_between_given = between_splish + within_splish + random.sample(between_imitations, 100)
 
-    between_to_within = {}
-    between_to_within['given'] = between_imitations[len(between_imitations)/2:]
-    between_to_within['choices'] = within_choices
-    with open('between_imitations_to_within_choices_survey_part_2.json', 'w') as f:
-        f.write(json.dumps(between_to_within))
+    between_plus_within_splish = {}
+    between_plus_within_splish['choices'] = between_choices
+    between_plus_within_splish['given'] = all_between_given
 
+    with open('between_survey_with_within_splish.json', 'w') as f:
+        f.write(json.dumps(between_plus_within_splish))
 
-    within_to_between = {}
-    within_to_between['given'] = within_imitations[len(within_imitations)/2:]
-    within_to_between['choices'] = between_choices
-    with open('within_imitations_to_between_choices_survey_part_1.json', 'w') as f:
-        f.write(json.dumps(within_to_between))
+    all_within_given = within_splish + between_splish + random.sample(within_imitations, 100)
 
-    within_to_between = {}
-    within_to_between['given'] = within_imitations[:len(within_imitations)/2]
-    within_to_between['choices'] = between_choices
-    with open('within_imitations_to_between_choices_survey_part_2.json', 'w') as f:
-        f.write(json.dumps(within_to_between))
+    within_plus_between_splish = {}
+    within_plus_between_splish['choices'] = within_choices
+    within_plus_between_splish['given'] = all_within_given
+
+    with open('within_survey_with_between_splish.json', 'w') as f:
+        f.write(json.dumps(within_plus_between_splish))
+
+    return between_plus_within_splish, within_plus_between_splish
 
 
 if __name__ == '__main__':
-    create_surveys_a()
-    create_surveys_b()
-    create_surveys_c()
+    a1, a2 = create_surveys_a()
+    b1, b2 = create_surveys_b()
+    b, w = create_surveys_c()
