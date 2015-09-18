@@ -4,29 +4,22 @@ library(scales)
 
 options(stringsAsFactors = FALSE)
 
-between_responses <- read.csv("data/between_responses.csv")
-between_responses <- between_responses %>%
-  mutate(
-    is_correct = as.numeric(answer == selection),
-    contrast = "between"
+devtools::load_all()
+
+responses <- get_responses()
+
+accuracies <- responses %>%
+  group_by(contrast, generation) %>%
+  summarize(
+    num_ratings = n(),
+    accuracy = mean(is_correct)
   )
 
-within_responses <- read.csv("data/within_responses.csv")
-within_responses <- within_responses %>%
-  mutate(
-    is_correct = as.numeric(answer == selection),
-    contrast = "within"
-  )
+base_plot <- ggplot(responses, aes(x = generation, y = is_correct, color = contrast)) +
+  geom_point(aes(y = accuracy, size = num_ratings), data = accuracies, shape = 1) +
+  geom_smooth(aes(group = contrast), method = "lm", se = FALSE)
 
-accuracies <- rbind(between_responses, within_responses) %>%
-  group_by(contrast, given_gen) %>%
-  summarize(accuracy = mean(is_correct))
-
-base_plot <- ggplot(accuracies, aes(x = given_gen, y = accuracy, color = contrast)) +
-  geom_point(shape = 1, size = 3) +
-  geom_smooth(method = "lm", formula = "y ~ poly(x,2)", se = FALSE)
-
-max_gen = max(accuracies$given_gen)
+max_gen = max(accuracies$generation)
 styled_plot <- base_plot +
   scale_x_continuous("Generation") +
   scale_y_continuous("Accuracy", breaks = seq(0.1, 1.0, by = 0.1), labels = percent) +
