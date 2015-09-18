@@ -55,4 +55,4 @@ def create_surveys_b():
 
 if __name__ == '__main__':
     create_surveys_a()
-    # create_surveys_b()
+    create_surveys_b()
