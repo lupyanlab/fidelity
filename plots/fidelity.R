@@ -6,27 +6,43 @@ options(stringsAsFactors = FALSE)
 
 devtools::load_all()
 
-responses <- get_responses()
+responses <- get_responses() %>%
+  filter(survey_label %in% c("between", "within"))
 
 accuracies <- responses %>%
-  group_by(contrast, generation) %>%
+  group_by(survey_label, generation, given) %>%
   summarize(
     num_ratings = n(),
     accuracy = mean(is_correct)
   )
 
-base_plot <- ggplot(responses, aes(x = generation, y = is_correct, color = contrast)) +
-  geom_point(aes(y = accuracy, size = num_ratings), data = accuracies, shape = 1) +
-  geom_smooth(aes(group = contrast), method = "lm", se = FALSE)
+base_plot <- ggplot(responses, aes(x = generation, y = is_correct, color = survey_label)) +
+  geom_point(aes(y = accuracy, alpha = num_ratings),
+             position = position_jitter(width = 0.2, height = 0.0),
+             size = 3, data = accuracies) +
+  geom_smooth(aes(group = survey_label), method = "lm", se = FALSE)
+
+
+color_scheme = c("#8da0cb", "#66c2a5")
+# orange = "#fc8d62"
+
 
 max_gen = max(accuracies$generation)
 styled_plot <- base_plot +
-  scale_x_continuous("Generation") +
-  scale_y_continuous("Accuracy", breaks = seq(0.1, 1.0, by = 0.1), labels = percent) +
+  scale_x_continuous("Generation", breaks = 1:13) +
+  scale_y_continuous("Accuracy", breaks = seq(0.0, 1.0, by = 0.25), labels = percent) +
+  scale_color_manual("Distractors", labels = c("Between Category", "Within Category"),
+                     values = color_scheme) +
   coord_cartesian(xlim = c(0.5, max_gen + 0.5)) +
-  geom_hline(yintercept = 0.25, lty = 2) +
-  annotate("text", x = 0.6, y = 0.27, label = "chance", hjust = 0) +
-  theme_classic()
+  geom_hline(yintercept = 0.25, lty = 2, color = "gray", alpha = 0.6) +
+  theme_classic() +
+  guides(alpha = "none") +
+  theme(
+    legend.title.align = 0.5,
+    legend.background = element_blank(),
+    legend.position = c(0.8, 0.14)
+  )
+
 styled_plot
 
-ggsave("plots/fidelity.png")
+ggsave("plots/fidelity.png", width = 5, height = 4, units = "in")
