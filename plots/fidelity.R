@@ -1,13 +1,8 @@
-library(dplyr)
+source("models/fidelity.R")
+
 library(ggplot2)
 library(scales)
-
-options(stringsAsFactors = FALSE)
-
-devtools::load_all()
-
-responses <- get_responses() %>%
-  filter(survey_label %in% c("between", "within"))
+library(AICcmodavg)
 
 accuracies <- responses %>%
   group_by(survey_label, generation, given) %>%
@@ -16,16 +11,22 @@ accuracies <- responses %>%
     accuracy = mean(is_correct)
   )
 
+x_preds <- responses[,c("survey_label", "distractors_c", "generation")] %>% unique
+glmer_preds <- predictSE(fidelity_mod, x_preds, se = TRUE, print.matrix = TRUE) %>%
+  as.data.frame %>%
+  rename(is_correct = fit, se = se.fit) %>%
+  cbind(x_preds, .)
+
+
 base_plot <- ggplot(responses, aes(x = generation, y = is_correct, color = survey_label)) +
   geom_point(aes(y = accuracy, alpha = num_ratings),
              position = position_jitter(width = 0.2, height = 0.0),
              size = 3, data = accuracies) +
-  geom_smooth(aes(group = survey_label), method = "lm", se = FALSE)
-
+  geom_smooth(aes(group = survey_label, ymin = is_correct-se, ymax = is_correct+se),
+              data = glmer_preds, stat = "identity", size = 1.0)
 
 color_scheme = c("#8da0cb", "#66c2a5")
 # orange = "#fc8d62"
-
 
 max_gen = max(accuracies$generation)
 styled_plot <- base_plot +
@@ -40,7 +41,7 @@ styled_plot <- base_plot +
   theme(
     legend.title.align = 0.5,
     legend.background = element_blank(),
-    legend.position = c(0.8, 0.14)
+    legend.position = c(0.8, 0.86)
   )
 
 styled_plot

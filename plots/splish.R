@@ -1,14 +1,8 @@
-library(dplyr)
+source("models/splish.R")
+
 library(ggplot2)
 library(scales)
-
-options(stringsAsFactors = FALSE)
-
-devtools::load_all()
-
-responses <- get_responses() %>%
-  filter(survey_label %in% c("between-splish", "within-splish"),
-         given_chain == "splish")
+library(AICcmodavg)
 
 accuracies <- responses %>%
   group_by(survey_label, given_game, generation, given) %>%

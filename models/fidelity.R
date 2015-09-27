@@ -1,5 +1,6 @@
 library(dplyr)
 library(lme4)
+library(broom)
 
 options(stringsAsFactors = FALSE)
 
@@ -8,11 +9,18 @@ devtools::load_all()
 responses <- get_responses() %>%
   filter(survey_label %in% c("between", "within"))
 
-fidelity_mod <- glm(is_correct ~ generation * survey_label, family = binomial, data = responses)
-summary(fidelity_mod)
+responses <- recode_distractors(responses)
 
-responses$given_chain_group <- with(responses, paste0(given_game,given_chain))
-
-fidelity_mod <- glmer(is_correct ~ generation * survey_label + (generation|given_chain),
+fidelity_mod <- glmer(is_correct ~ generation * distractors_c + (generation|given_chain),
                       data = responses, family = binomial)
 summary(fidelity_mod)
+
+generation_mod_within <- glmer(is_correct ~ generation + (generation|given_chain),
+                               data = filter(responses, survey_label == "within"),
+                               family = binomial)
+tidy(generation_mod_within, effects = "fixed")
+
+generation_mod_between <- glmer(is_correct ~ generation + (generation|given_chain),
+                               data = filter(responses, survey_label == "between"),
+                               family = binomial)
+tidy(generation_mod_between, effects = "fixed")
