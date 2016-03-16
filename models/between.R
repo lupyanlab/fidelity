@@ -3,9 +3,9 @@ library(lme4)
 library(broom)
 
 devtools::load_all()
+data(fidelity)
 
-between <- get_responses() %>%
-  filter(survey_label == "between")
+between <- filter(fidelity, survey_label == "between")
 
 between %>%
   group_by(generation) %>%
@@ -14,6 +14,6 @@ between %>%
 between %>%
   summarize(accuracy = mean(is_correct))
 
-between_mod <- glmer(is_correct ~ offset(logit(chance)) + generation + (generation|chain_name),
-                     data = between, family = binomial)
+between_mod <- glmer(is_correct ~ generation + (generation|chain_name),
+                     offset = chance, family = "binomial", data = between)
 summary(between_mod)
