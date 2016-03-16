@@ -1,4 +1,4 @@
-survey_id,survey_label,question_id,given,given_game,given_chain,generation,answer
+survey_id,survey_label,question_id,message_id,game_name,chain_name,generation,answer
 1,between,1,13,between-category-game-a,frip,1,4
 12,between-splish,581,13,between-category-game-a,frip,1,4
 1,between,2,15,between-category-game-a,frip,1,4

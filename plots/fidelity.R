@@ -5,7 +5,7 @@ library(scales)
 library(AICcmodavg)
 
 accuracies <- responses %>%
-  group_by(survey_label, generation, given) %>%
+  group_by(survey_label, generation, message_id) %>%
   summarize(
     num_ratings = n(),
     accuracy = mean(is_correct)

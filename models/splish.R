@@ -7,7 +7,7 @@ devtools::load_all()
 
 responses <- get_responses() %>%
   filter(survey_label %in% c("between-splish", "within-splish"),
-         given_chain == "splish") %>%
+         chain_name == "splish") %>%
   mutate(survey_label = ifelse(survey_label == "within-splish", "within", "between"))
 
 responses <- responses %>%

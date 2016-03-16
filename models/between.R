@@ -14,6 +14,6 @@ between %>%
 between %>%
   summarize(accuracy = mean(is_correct))
 
-between_mod <- glmer(is_correct ~ offset(logit(chance)) + generation + (generation|given_chain),
+between_mod <- glmer(is_correct ~ offset(logit(chance)) + generation + (generation|chain_name),
                      data = between, family = binomial)
 summary(between_mod)

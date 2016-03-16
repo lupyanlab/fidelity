@@ -19,7 +19,7 @@ responses = responses.merge(questions)
 
 responses = responses[[
     'survey_id', 'survey_label',
-    'question_id', 'given', 'generation', 'given_game', 'given_chain',
+    'question_id', 'message_id', 'generation', 'game_name', 'chain_name',
     'answer', 'selection',
 ]]
 

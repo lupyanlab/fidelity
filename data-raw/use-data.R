@@ -2,10 +2,16 @@ library(dplyr)
 library(devtools)
 options(stringsAsFactors = FALSE)
 
-fidelity <- read.csv("data-raw/responses.csv") %>%
-  mutate(is_correct = as.numeric(selection == answer))
+tidy_responses <- function(frame) {
+  frame %>%
+    mutate(
+      is_correct = as.numeric(selection == answer),
+      chance = 0.25
+    )
+}
 
-splish <- read.csv("data-raw/splish.csv") %>%
-  mutate(is_correct = as.numeric(selection == answer))
+fidelity <- read.csv("data-raw/responses.csv") %>% tidy_responses
+
+splish <- read.csv("data-raw/splish.csv") %>% tidy_responses
 
 use_data(fidelity, splish, overwrite = TRUE)

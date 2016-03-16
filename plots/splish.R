@@ -5,7 +5,7 @@ library(scales)
 library(AICcmodavg)
 
 accuracies <- responses %>%
-  group_by(survey_label, given_game, generation, given) %>%
+  group_by(survey_label, game_name, generation, message_id) %>%
   summarize(
     num_ratings = n(),
     is_correct = mean(is_correct)
@@ -37,6 +37,6 @@ ggplot(responses, aes(x = generation, y = is_correct, color = survey_label)) +
     legend.title.align = 0.5,
     legend.background = element_blank(),
     legend.position = c(0.85, 0.8)
-  ) + facet_grid(. ~ given_game, labeller = facet_labeller)
+  ) + facet_grid(. ~ game_name, labeller = facet_labeller)
 
 ggsave("plots/splish.png", width = 5, height = 4, units = "in")

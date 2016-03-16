@@ -14,6 +14,12 @@ def make():
 
 
 @task
+def rda():
+    """Run the use-data script."""
+    run("Rscript data-raw/use-data.R")
+
+
+@task
 def install():
     """Install the fidelity R package."""
     run("Rscript -e 'devtools::install()'")

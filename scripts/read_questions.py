@@ -12,7 +12,7 @@ del questions['fields']
 del questions['model']
 del questions['choices']
 
-questions.rename(columns={'pk': 'question_id', 'survey': 'survey_id'}, inplace=True)
+questions.rename(columns={'pk': 'question_id', 'survey': 'survey_id', 'given': 'message_id'}, inplace=True)
 
 survey_info = pd.DataFrame({
     'survey_id': [1, 2, 3, 4, 12, 13],
@@ -30,21 +30,20 @@ def pick_ancestor(message):
         parent = messages.ix[messages.message_id == message, 'parent_id']
         return pick_ancestor(int(parent))
 
-questions['answer'] = questions.given.apply(pick_ancestor)
+questions['answer'] = questions.message_id.apply(pick_ancestor)
 
 given = messages[['message_id', 'generation', 'game_name', 'chain_name']]
-given.rename(columns={'message_id': 'given', 'game_name': 'given_game', 'chain_name': 'given_chain'}, inplace=True)
 
 questions = questions.merge(given)
 
-questions = questions[['survey_id', 'survey_label', 'question_id', 'given', 'given_game', 'given_chain', 'generation', 'answer']]
+questions = questions[['survey_id', 'survey_label', 'question_id', 'message_id', 'game_name', 'chain_name', 'generation', 'answer']]
 
 between_game_splish_id = 3
 within_game_splish_id = 138
 
-between_splish_imitations = (questions.survey_label == "within-splish") & (questions.given_game == "between-category-game-a")
+between_splish_imitations = (questions.survey_label == "within-splish") & (questions.game_name == "between-category-game-a")
 questions.ix[between_splish_imitations, 'answer'] = within_game_splish_id
-within_splish_imitations = (questions.survey_label == "between-splish") & (questions.given_game == "within-category-game-a")
+within_splish_imitations = (questions.survey_label == "between-splish") & (questions.game_name == "within-category-game-a")
 questions.ix[within_splish_imitations, 'answer'] = between_game_splish_id
 
 questions.to_csv(Path(survey_dir, 'questions.csv'), index=False)
