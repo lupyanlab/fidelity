@@ -1,13 +1,11 @@
 import pandas as pd
-import unipath as Path
+from unipath import Path
 
-messages = pd.read_json('messages.json')
+from __init__ import unfold, survey_dir
+
+messages = pd.read_json(Path(survey_dir, 'messages.json'))
 
 del messages['model']
-
-def unfold(json_frame, field):
-    json_frame[field] = json_frame.fields.apply(lambda x: x[field])
-    return json_frame
 
 for message_field in ['generation', 'num_children', 'audio', 'chain', 'parent']:
     messages = unfold(messages, message_field)
@@ -27,4 +25,4 @@ messages = messages.sort(['game_name', 'chain_name', 'message_name'])
 
 messages = messages.rename(columns={'pk': 'message_id', 'chain': 'chain_id', 'parent': 'parent_id'})
 
-messages.to_csv('messages.csv', index=False)
+messages.to_csv(Path(survey_dir, 'messages.csv'), index=False)

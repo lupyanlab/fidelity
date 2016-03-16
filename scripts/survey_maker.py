@@ -1,10 +1,13 @@
 import pandas as pd
 import json
+from unipath import Path
 
 import random
 
+from __init__ import survey_dir
+
 def create_surveys_a():
-    messages = pd.read_csv('messages-cleaned.csv')
+    messages = pd.read_csv(Path(survey_dir, 'messages-cleaned.csv'))
 
     # Remove messages that are null in the to_remove column
     messages = messages.ix[messages.to_remove.notnull()]
@@ -20,20 +23,26 @@ def create_surveys_a():
     between_survey = {}
     between_survey['choices'] = seeds.ix[seeds.game_name == between_game_name, 'message_id'].tolist()
     between_survey['given'] = imitations.ix[imitations.game_name == between_game_name, 'message_id'].tolist()
-    with open('between_survey_a.json', 'w') as f:
+
+    convert_to_int(between_survey)
+
+    with open(Path(survey_dir, 'between_survey_a.json'), 'w') as f:
         f.write(json.dumps(between_survey))
 
     within_game_name = 'within-category-game-a'
     within_survey = {}
     within_survey['choices'] = seeds.ix[seeds.game_name == within_game_name, 'message_id'].tolist()
     within_survey['given'] = imitations.ix[imitations.game_name == within_game_name, 'message_id'].tolist()
-    with open('within_survey_a.json', 'w') as f:
+
+    convert_to_int(within_survey)
+
+    with open(Path(survey_dir, 'within_survey_a.json'), 'w') as f:
         f.write(json.dumps(within_survey))
 
     return between_survey, within_survey
 
 def create_surveys_b():
-    messages = pd.read_csv('messages-cleaned.csv')
+    messages = pd.read_csv(Path(survey_dir, 'messages-cleaned.csv'))
 
     # Split off the seeds
     seeds = messages.ix[messages.generation == 0]
@@ -47,14 +56,20 @@ def create_surveys_b():
     between_survey = {}
     between_survey['choices'] = seeds.ix[seeds.game_name == between_game_name, 'message_id'].tolist()
     between_survey['given'] = imitations.ix[imitations.game_name == between_game_name, 'message_id'].tolist()
-    with open('between_survey_b.json', 'w') as f:
+
+    convert_to_int(between_survey)
+
+    with open(Path(survey_dir, 'between_survey_b.json'), 'w') as f:
         f.write(json.dumps(between_survey))
 
     within_game_name = 'within-category-game-a'
     within_survey = {}
     within_survey['choices'] = seeds.ix[seeds.game_name == within_game_name, 'message_id'].tolist()
     within_survey['given'] = imitations.ix[imitations.game_name == within_game_name, 'message_id'].tolist()
-    with open('within_survey_b.json', 'w') as f:
+
+    convert_to_int(within_survey)
+
+    with open(Path(survey_dir, 'within_survey_b.json'), 'w') as f:
         f.write(json.dumps(within_survey))
 
     return between_survey, within_survey
@@ -62,7 +77,7 @@ def create_surveys_b():
 def create_surveys_c():
     """ In this survey people are given imitations from the between-category-game-a
     and choices from the within-category-game."""
-    messages = pd.read_csv('messages-cleaned.csv')
+    messages = pd.read_csv(Path(survey_dir, 'messages-cleaned.csv'))
 
     # Get rid of bad recordings
     messages['to_remove'] = messages.to_remove.fillna(0)
@@ -93,7 +108,9 @@ def create_surveys_c():
     between_plus_within_splish['choices'] = between_choices
     between_plus_within_splish['given'] = all_between_given
 
-    with open('between_survey_with_within_splish.json', 'w') as f:
+    convert_to_int(between_plus_within_splish)
+
+    with open(Path(survey_dir, 'between_survey_with_within_splish.json'), 'w') as f:
         f.write(json.dumps(between_plus_within_splish))
 
     all_within_given = within_splish + between_splish + random.sample(within_imitations, 100)
@@ -102,11 +119,16 @@ def create_surveys_c():
     within_plus_between_splish['choices'] = within_choices
     within_plus_between_splish['given'] = all_within_given
 
-    with open('within_survey_with_between_splish.json', 'w') as f:
+    convert_to_int(within_plus_between_splish)
+
+    with open(Path(survey_dir, 'within_survey_with_between_splish.json'), 'w') as f:
         f.write(json.dumps(within_plus_between_splish))
 
     return between_plus_within_splish, within_plus_between_splish
 
+def convert_to_int(d):
+    for k, v in d.items():
+        d[k] = map(int, v)
 
 if __name__ == '__main__':
     a1, a2 = create_surveys_a()

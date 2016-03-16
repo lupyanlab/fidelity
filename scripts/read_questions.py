@@ -1,9 +1,9 @@
 import pandas as pd
 from unipath import Path
 
-from __init__ import unfold
+from __init__ import unfold, survey_dir
 
-questions = pd.read_json('../data/survey/questions.json')
+questions = pd.read_json(Path(survey_dir, 'questions.json'))
 
 for question_field in ['choices', 'given', 'survey', 'answer']:
     questions = unfold(questions, question_field)
@@ -21,7 +21,7 @@ survey_info = pd.DataFrame({
 
 questions = questions.merge(survey_info)
 
-messages = pd.read_csv('../data/survey/messages.csv')
+messages = pd.read_csv(Path(survey_dir, 'messages.csv'))
 
 def pick_ancestor(message):
     if message in [1,2,3,4] + [138,139,140,141]:
@@ -47,4 +47,4 @@ questions.ix[between_splish_imitations, 'answer'] = within_game_splish_id
 within_splish_imitations = (questions.survey_label == "between-splish") & (questions.given_game == "within-category-game-a")
 questions.ix[within_splish_imitations, 'answer'] = between_game_splish_id
 
-questions.to_csv('../data/survey/questions.csv', index=False)
+questions.to_csv(Path(survey_dir, 'questions.csv'), index=False)
