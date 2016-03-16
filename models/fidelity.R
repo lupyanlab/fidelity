@@ -12,7 +12,7 @@ responses <- fidelity %>% filter(survey_label %in% c("between", "within"))
 responses <- recode_distractors(responses)
 
 fidelity_mod <- glmer(is_correct ~ generation * distractors_c + (generation|chain_name),
-                      data = responses, family = binomial)
+                      offset = chance, data = responses, family = binomial)
 summary(fidelity_mod)
 
 generation_mod_within <- glmer(is_correct ~ generation + (generation|chain_name),
